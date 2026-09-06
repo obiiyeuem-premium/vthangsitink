@@ -1,106 +1,52 @@
--- ==================== 鑰匙驗證系統 (Key System) ====================
-local CorrectKey = "FREE_9999"
-local verified = false
+--[=[
+    BananaHub Secured Core - Anti-Bypass
+]=]
+local _env = getgenv()
+local _hs = game:GetService("HttpService")
+local _plrs = game:GetService("Players")
 
--- 簡單好用的 UI 輸入金鑰視窗
-local CoreGui = game:GetService("CoreGui")
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
+-- 強制檢驗並清除外部變數殘留，防止直接賦值繞過
+local userProvidedKey = _env.Key
+_env.Key = nil -- 立即清空，避免被外部直接呼叫
 
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "BananaHubKeySystem"
-ScreenGui.Parent = CoreGui
-ScreenGui.ResetOnSpawn = false
+local CorrectKey = "\70\82\69\69\57\57\57\57" -- "FREE9999"
 
-local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 320, 0, 180)
-Frame.Position = UDim2.new(0.5, -160, 0.5, -90)
-Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Frame.BorderSizePixel = 0
-Frame.Parent = ScreenGui
+if not userProvidedKey or userProvidedKey ~= CorrectKey then
+    -- 故意觸發錯誤或強制踢出，達到攔截效果
+    _plrs.LocalPlayer:Kick("Security Error: Unauthorized Access Attempt Detected!")
+    error("Access Denied")
+    return
+end
 
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 10)
-UICorner.Parent = Frame
-
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 40)
-Title.BackgroundTransparency = 1
-Title.Text = "Banana Hub - Key System"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 18
-Title.Font = Enum.Font.GothamBold
-Title.Parent = Frame
-
-local TextBox = Instance.new("TextBox")
-TextBox.Size = UDim2.new(0.8, 0, 0, 40)
-TextBox.Position = UDim2.new(0.1, 0, 0.35, 0)
-TextBox.PlaceholderText = "請輸入金鑰 (預設: FREE_9999)"
-TextBox.Text = ""
-TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-TextBox.TextSize = 14
-TextBox.Font = Enum.Font.Gotham
-TextBox.Parent = Frame
-
-local BoxCorner = Instance.new("UICorner")
-BoxCorner.CornerRadius = UDim.new(0, 6)
-BoxCorner.Parent = TextBox
-
-local Button = Instance.new("TextButton")
-Button.Size = UDim2.new(0.8, 0, 0, 40)
-Button.Position = UDim2.new(0.1, 0, 0.65, 0)
-Button.Text = "確認驗證"
-Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-Button.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-Button.TextSize = 16
-Button.Font = Enum.Font.GothamBold
-Button.Parent = Frame
-
-local BtnCorner = Instance.new("UICorner")
-BtnCorner.CornerRadius = UDim.new(0, 6)
-BtnCorner.Parent = Button
-
-local bindable = Instance.new("BindableEvent")
-
-Button.MouseButton1Click:Connect(function()
-    if TextBox.Text == CorrectKey then
-        verified = true
-        ScreenGui:Destroy()
-        bindable:Fire()
-    else
-        Button.Text = "金鑰錯誤！請重試"
-        Button.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-        task.wait(1.5)
-        Button.Text = "確認驗證"
-        Button.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-    end
+-- 通過驗證後的遊戲主載入邏輯
+local success, UniverseID = pcall(function()
+    return _hs:JSONDecode(_hs:HttpGet("https://apis.roblox.com/universes/v1/places/"..game.PlaceId.."/universe")).universeId
 end)
 
-bindable.Event:Wait()
--- ====================================================================
+if not success or not UniverseID then
+    UniverseID = 0
+end
 
--- 通過驗證後執行的主程式
-local UniverseID = game:GetService("HttpService"):JSONDecode(game:HttpGet("https://apis.roblox.com/universes/v1/places/"..game.PlaceId.."/universe")).universeId
+local PlaceId = game.PlaceId
 
-if game.PlaceId == 1537690962 or game.PlaceId == 4079902982 then
-    if getgenv().betabss then
+if PlaceId == 1537690962 or PlaceId == 4079902982 then
+    if _env.betabss then
         loadstring(game:HttpGet("https://raw.githubusercontent.com/hlamx/huhu/master/bssrewrite-obfuscated.lua"))()
     else
         loadstring(game:HttpGet("https://raw.githubusercontent.com/obiiyeuem/vthangsitink/main/BSS-BananaCat.lua"))()
     end
-elseif game.PlaceId == 10260193230 then 
+elseif PlaceId == 10260193230 then 
     loadstring(game:HttpGet("https://raw.githubusercontent.com/obiiyeuem/vthangsitink/main/Seahuhu-BananaCat.lua"))()
-elseif game.PlaceId == 7449423635 or game.PlaceId == 2753915549 or game.PlaceId == 4442272183 or game.PlaceId == 122478697296975 or UniverseID == 994732206 then
+elseif PlaceId == 7449423635 or PlaceId == 2753915549 or PlaceId == 4442272183 or PlaceId == 122478697296975 or UniverseID == 994732206 then
     loadstring(game:HttpGet("https://raw.githubusercontent.com/obiiyeuem/vthangsitink/main/BF-BananaCat.lua"))()
-elseif game.PlaceId == 4520749081 or  game.PlaceId == 6381829480 or game.PlaceId == 15759515082 or game.PlaceId == 5931540094 then 
-    repeat task.wait() until game.Players.LocalPlayer and game.Players.LocalPlayer:FindFirstChild("DataLoaded") and game.Players.LocalPlayer:FindFirstChild("DataLoaded").Value
+elseif PlaceId == 4520749081 or PlaceId == 6381829480 or PlaceId == 15759515082 or PlaceId == 5931540094 then 
+    repeat task.wait() until _plrs.LocalPlayer and _plrs.LocalPlayer:FindFirstChild("DataLoaded") and _plrs.LocalPlayer:FindFirstChild("DataLoaded").Value
     loadstring(game:HttpGet("https://raw.githubusercontent.com/obiiyeuem/vthangsitink/main/KL-BananaCat.lua"))()
-elseif game.PlaceId == 18901165922 or game.PlaceId == 19006211286 then 
+elseif PlaceId == 18901165922 or PlaceId == 19006211286 then 
     loadstring(game:HttpGet("https://raw.githubusercontent.com/obiiyeuem/vthangsitink/refs/heads/main/PetsGo.lua"))()
-elseif game.PlaceId == 16732694052 then 
+elseif PlaceId == 16732694052 then 
     loadstring(game:HttpGet("https://raw.githubusercontent.com/AhmadV99/Banana-Cat-Hub/main/Fisch.lua"))()
-elseif UniverseID == 5844593548  then 
+elseif UniverseID == 5844593548 then 
     loadstring(game:HttpGet("https://raw.githubusercontent.com/obiiyeuem/vthangsitink/main/AnimeReborn.lua"))()
 elseif UniverseID == 6325068386 then
     loadstring(game:HttpGet("https://raw.githubusercontent.com/obiiyeuem/vthangsitink/refs/heads/main/Bluelock.lua"))()
