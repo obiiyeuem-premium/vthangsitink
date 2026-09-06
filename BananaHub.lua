@@ -1,5 +1,5 @@
 --[=[
-    BananaHub Secured Core - UI Key System Version
+    BananaHub - UI Key System
 ]=]
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
@@ -83,7 +83,6 @@ end)
 
 bindable.Event:Wait()
 
--- 通過驗證後的遊戲主載入邏輯
 local success, UniverseID = pcall(function()
     return HttpService:JSONDecode(HttpService:HttpGet("https://apis.roblox.com/universes/v1/places/"..game.PlaceId.."/universe")).universeId
 end)
