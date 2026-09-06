@@ -1,20 +1,20 @@
 --[=[
-    BananaHub Secured Core - Anti-Bypass
+    BananaHub Secured Core - Fixed Version
 ]=]
 local _env = getgenv()
 local _hs = game:GetService("HttpService")
 local _plrs = game:GetService("Players")
 
--- 強制檢驗並清除外部變數殘留，防止直接賦值繞過
+-- 確保 LocalPlayer 已經存在
+repeat task.wait() until _plrs.LocalPlayer
+
 local userProvidedKey = _env.Key
-_env.Key = nil -- 立即清空，避免被外部直接呼叫
+_env.Key = nil -- 清除全域變數
 
 local CorrectKey = "\70\82\69\69\57\57\57\57" -- "FREE9999"
 
 if not userProvidedKey or userProvidedKey ~= CorrectKey then
-    -- 故意觸發錯誤或強制踢出，達到攔截效果
-    _plrs.LocalPlayer:Kick("Security Error: Unauthorized Access Attempt Detected!")
-    error("Access Denied")
+    _plrs.LocalPlayer:Kick("Security Error: Invalid or Missing Key!")
     return
 end
 
