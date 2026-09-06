@@ -1,5 +1,5 @@
 --[=[
-    BananaHub - UI Key System
+    BananaHub - Stable UI Key System
 ]=]
 local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
@@ -64,16 +64,14 @@ local BtnCorner = Instance.new("UICorner")
 BtnCorner.CornerRadius = UDim.new(0, 6)
 BtnCorner.Parent = Button
 
-local bindable = Instance.new("BindableEvent")
 local connection
 connection = Button.MouseButton1Click:Connect(function()
     if TextBox.Text == CorrectKey then
         verified = true
         if connection then connection:Disconnect() end
         ScreenGui:Destroy()
-        bindable:Fire()
     else
-        Button.Text = "金鑰錯誤！請重試"
+        Button.Text = "金鑰錯誤！"
         Button.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
         task.wait(1.5)
         Button.Text = "確認驗證"
@@ -81,8 +79,10 @@ connection = Button.MouseButton1Click:Connect(function()
     end
 end)
 
-bindable.Event:Wait()
+-- 用最安全的輪詢等待直到驗證成功
+repeat task.wait(0.1) until verified
 
+-- 通過驗證後的遊戲主載入邏輯
 local success, UniverseID = pcall(function()
     return HttpService:JSONDecode(HttpService:HttpGet("https://apis.roblox.com/universes/v1/places/"..game.PlaceId.."/universe")).universeId
 end)
